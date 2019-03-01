@@ -11,10 +11,7 @@ import akka.japi.pf.ReceiveBuilder
 class Server(private val manager: ActorRef) : AbstractLoggingActor(){
 
     companion object {
-
-        fun props(manager: ActorRef): Props {
-            return Props.create(Server::class.java, manager)
-        }
+        fun props(manager: ActorRef) = Props.create(Server::class.java, manager)!!
     }
 
     @Throws(Exception::class)
@@ -27,12 +24,12 @@ class Server(private val manager: ActorRef) : AbstractLoggingActor(){
 
     override fun createReceive() =
         ReceiveBuilder()
-            .match(Tcp.Bound::class.java) { manager!!.tell(it, self) }
+            .match(Tcp.Bound::class.java) { manager.tell(it, self) }
             .match(Tcp.CommandFailed::class.java) { context.stop(self)}
             .match(Tcp.Connected::class.java) {
-                manager!!.tell(it, self)
+                manager.tell(it, self)
                 val handler: ActorRef = context.actorOf(Props.create(SocketHandler::class.java))
                 sender().tell(TcpMessage.register(handler), self)
             }
-            .build()
+            .build()!!
 }

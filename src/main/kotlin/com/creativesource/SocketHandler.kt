@@ -13,7 +13,8 @@ class SocketHandler: AbstractLoggingActor() {
                 Tcp.Received::class.java
             ) { msg ->
                 val data = msg.data()
-                log().info("Received -> $data")
+                val logMsg = data.decodeString("UTF-8")
+                log().info("Received -> $logMsg")
                 sender.tell(TcpMessage.write(data), self)
             }
             .match(ConnectionClosed::class.java) { context.stop(self) }
